@@ -28,11 +28,11 @@
 **Note:** If you use another k-Wave version or you install k-Wave in a different location (not recommended), you need to modify the installation paths in the file `PATHS.mat`, so that k-Wave can be located (see [Custom installation](#custom-installation) below).
 
 ### Example flow geometry data
-Download example flow geometry data from [SURFdrive](https://surfdrive.surf.nl). Download the flow geometry folders you wish to use and place these in the folder `geometry_data`. As a minimum requirement, download the folder `renal_tree` as this is the default flow geometry.
+Download example flow geometry data from [Zenodo](https://zenodo.org/records/10570013). Download the flow geometry folders you wish to use and place these in the folder `geometry_data`. As a minimum requirement, download the folder `renal_tree` as this is the default flow geometry.
 
 ### Flow solver module
 
-**Note:** Users who only use the example flow data from [SURFdrive](https://surfdrive.surf.nl) do not have to install the APES suite and Musubi.
+**Note:** Users who only use the example flow data from [Zenodo](https://zenodo.org/records/10570013) do not have to install the APES suite and Musubi.
 
 - Download the APES Suite from [GitHub](https://github.com/apes-suite).
 - Download the LBM solver [Musubi](https://geb.inf.tu-dresden.de/doxy/musubi/index.html).
@@ -40,7 +40,7 @@ Download example flow geometry data from [SURFdrive](https://surfdrive.surf.nl).
 
 ### vtkToolbox
 
-**Note:** Users who only use the example flow data from [SURFdrive](https://surfdrive.surf.nl) do not have to install the vtkToolbox.
+**Note:** Users who only use the example flow data from [Zenodo](https://zenodo.org/records/10570013) do not have to install the vtkToolbox.
 
 The output of Musubi is in VTU format. You need the vtkToolbox to convert VTU data to a MATLAB readable format. 
 - Download he VTU toolbox from [MATLAB File Exchange](https://nl.mathworks.com/matlabcentral/fileexchange/94993-vtktoolbox) or [GitHub](https://github.com/KIT-IBT/vtkToolbox).
