@@ -151,7 +151,7 @@ To modify the k-Wave medium, for example, add a cyst or a specific geometry:
 
 ## Delay-and-sum (DAS) image reconstruction
 
-The folder `image-reconstruction` in the root directory of the simulator contains the script `run_reconstruction.m`. 
+The folder `delay-and-sum` in the root directory of the simulator contains functions for delay-and-sum (DAS) image reconstruction. The folder `example_scripts` contains an [example script](example_scripts/example_reconstruction.m) for running a DAS reconstruction.
 - Run the script.
 - At the first prompt, select the folder containing the results of the simulation.
 - At the second prompt, select the GUI parameter file (settings file) corresponding to the simulation.
