@@ -48,7 +48,7 @@ Download the flow geometries you wish to use, unzip the ZIP files, and place the
 **Note:** Users who only use the example flow data from [Zenodo](https://zenodo.org/records/10573662) do not have to install the vtkToolbox.
 
 The output of Musubi is in VTU format. You need the vtkToolbox to convert VTU data to a MATLAB readable format. 
-- Download he VTU toolbox from [MATLAB File Exchange](https://nl.mathworks.com/matlabcentral/fileexchange/94993-vtktoolbox) or [GitHub](https://github.com/KIT-IBT/vtkToolbox).
+- Download the vtkToolbox from [MATLAB File Exchange](https://nl.mathworks.com/matlabcentral/fileexchange/94993-vtktoolbox) or [GitHub](https://github.com/KIT-IBT/vtkToolbox).
 - Copy the contents of vtkToolbox to `geometry_data/vtkToolbox`.
 
 ### Custom installation
