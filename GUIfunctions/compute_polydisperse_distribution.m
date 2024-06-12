@@ -1,5 +1,5 @@
-function [R,P] = compute_sonovue_distribution()
-% Polydisperse size distribution of SonoVue, see:
+function [R,P] = compute_polydisperse_distribution()
+% Polydisperse size distribution of BR-14, see:
 %
 % N. Blanken, J. M. Wolterink, H. Delingette, C. Brune, M. Versluis and 
 % G. Lajoinie, Super-Resolved Microbubble Localization in Single-Channel 

@@ -19,7 +19,7 @@ Microbubble.Distribution.PDI             = 5;        % (%)
 
 
 % Default: SonoVue distribution:
-[R,P] = compute_sonovue_distribution();
+[R,P] = compute_polydisperse_distribution();
 
 Microbubble.Distribution.Radii       	= R;    % Radii of distribution
 Microbubble.Distribution.Probabilities 	= P;    % Probabilities of 
