@@ -14,9 +14,18 @@ ppwl = SimulationParameters.PointsPerWavelength;
 grid_spacing = c/(f0*ppwl);
 SimulationParameters.GridSize = grid_spacing;
 
+% Add configuration field for compatibility with older version
+if ~isfield(Transducer,'Configuration')
+    Transducer.Configuration = 'Linear';
+end
+
 % Compute delays
 if strcmp(Transmit.DelayType,'Compute delays')
     Transmit = compute_delays(Transmit,Transducer,Medium);
+end
+
+if strcmp(Transmit.DelayType,'No delays')
+    Transmit.Delays = zeros(1,Transducer.NumberOfElements);
 end
 
 % Assign apodization

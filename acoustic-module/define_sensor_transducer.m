@@ -1,7 +1,7 @@
 function [sensor, sensor_weights] = define_sensor_transducer(...
     Transducer, Grid)
 
-Grid.sensor_on_grid = false;
+Grid.sensor_on_grid = Transducer.OnGrid;
 
 % Get number of transducer elements, number of integration points per
 % element and number of dimensions:

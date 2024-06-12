@@ -26,10 +26,20 @@ switch run_param.DATA_CAST_RF
         useGPU   = false;
 end
 
-apod   = Transducer.integration_receive_apodization;
-delays = Transducer.integration_receive_delays(:);
-apod   = cast(apod,  dataType);
-delays = cast(delays,dataType);
+apod    = Transducer.integration_receive_apodization;
+delays  = Transducer.integration_receive_delays(:);
+weights = Transducer.integration_weights;
+
+% Normalise the quadrature weights:
+if numel(weights) == 1
+    weights = 1/N_int;
+else
+    weights = weights./sum(weights,2);
+end
+
+apod    = cast(apod,    dataType);
+delays  = cast(delays,  dataType);
+weights = cast(weights, dataType);
 
 % Compute signal length required to apply the delays:
 N = M + ceil(max(delays)/Grid.dt);
@@ -72,7 +82,7 @@ p = ifft(p,[],2,'symmetric');
 p = reshape(p,N_el,N_int,N).* apod;
 
 % Compute the average pressure for each element:
-p = reshape(mean(p,2),N_el,N);
+p = reshape(sum(p.*weights,2),N_el,N);
 
 if useGPU; p = gather(p); end
 

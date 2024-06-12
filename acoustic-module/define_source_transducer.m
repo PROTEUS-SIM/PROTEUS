@@ -11,26 +11,29 @@ function source = define_source_transducer(Transducer, Transmit, ...
 % output:   source                  the transducer source object
 % =========================================================================
 
-% Get number of transducer elements, number of integration points per
-% element and number of dimensions:
-[N_el,N_int,~] = size(Transducer.integration_points);
+delays  = Transducer.integration_transmit_delays;
+apod    = Transducer.integration_transmit_apodization;
+weights = Transducer.integration_weights;
 
-N_points =  N_int*N_el;
+% Apply electronic delays:
+delays = delays + transpose(Transmit.Delays);
+
+% Apply electronic apodization:
+apod   = apod.*transpose(Transmit.Apodization);
 
 % Pulsing scheme
 switch Transmit.SeqPulse
     case 'even'
-        Transducer.integration_transmit_apodization(1:2:end, :) = 0;
+        apod(1:2:end, :) = 0;
     case 'odd'
-        Transducer.integration_transmit_apodization(2:2:end, :) = 0;
+        apod(2:2:end, :) = 0;
     case 'minus'
-        Transducer.integration_transmit_apodization = ...
-            -Transducer.integration_transmit_apodization;
+        apod = -apod;
 end
 
-delays = reshape(Transducer.integration_transmit_delays, N_points, 1);
-apod   = reshape(Transducer.integration_transmit_apodization, N_points, 1);
-integration_weight = Transducer.integration_weights;
+delays  = delays(:);
+apod    = apod(:);
+weights = weights(:);
 
 % Acoustic impedance:    
 Z = Medium.SpeedOfSound*Medium.Density;
@@ -64,6 +67,6 @@ velocity_source = ifft(velocity_source,[],2,'symmetric');
 
 % Multiply the spatial delta function with the velocity source signals of 
 % point sources.
-source.ux = source_weights * (velocity_source*integration_weight);
+source.ux = source_weights * (velocity_source.*weights);
 
 end

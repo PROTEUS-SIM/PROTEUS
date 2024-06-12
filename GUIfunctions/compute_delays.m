@@ -8,7 +8,13 @@ f       = Transmit.LateralFocus;    % [m]
 theta   = Transmit.Angle;           % [degrees]
 
 % Compute transducer element positions
-N = Transducer.NumberOfElements;
+if strcmp(Transducer.Configuration,'Linear')
+    N = Transducer.NumberOfElements;
+elseif strcmp(Transducer.Configuration,'RCA')
+    N = Transducer.NumberOfElements/2;
+else
+    error('Compute delays not supported for this transducer configuration')
+end
 x = (-(N-1)/2:(N-1)/2)*Transducer.Pitch;
 
 f_x = f*sind(theta);    % lateral component focal point [m]
@@ -30,5 +36,10 @@ end
 
 % Make all delays nonnegative:
 Transmit.Delays = delays - min(delays);
+
+% For RCAs, apply the same delays to columns and rows
+if strcmp(Transducer.Configuration,'RCA')
+    Transmit.Delays = [Transmit.Delays Transmit.Delays];
+end
 
 end

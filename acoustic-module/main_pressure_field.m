@@ -27,6 +27,19 @@ if isempty(varargin); inputCell = []; else; inputCell{4} = varargin{1}; end
 % simulation settings
 run_param = sim_setup(SimulationParameters);
 
+% Properties of the representation of the transducer on the grid:
+if isfield(SimulationParameters,'TransducerOnGrid')
+    Transducer.OnGrid = SimulationParameters.TransducerOnGrid;
+else
+    Transducer.OnGrid = false;
+end
+if isfield(SimulationParameters,'IntegrationDensity')
+    Transducer.IntegrationDensity = ...
+        SimulationParameters.IntegrationDensity;
+else
+    Transducer.IntegrationDensity = 1;
+end
+
 % Location of the geometry data:
 Geometry.GeometriesPath = run_param.GeometriesPath;
 
@@ -56,6 +69,10 @@ if Medium.Save
     save([savedir '/medium.mat'],'medium','vessel_grid','Grid','-v7.3')
 end
 
+% Distribute integration points at the transducer surface:
+Transducer = get_transducer_integration_points(Transducer, Grid);
+Transducer = get_transducer_integration_delays(Transducer, Medium);
+
 % record signals long enough for back and forth pass of the wave
 run_param = compute_travel_times(run_param, ...
     Geometry,Medium,Transducer,Transmit);
@@ -65,10 +82,6 @@ kgrid.Nt = floor(run_param.tr(1) / kgrid.dt) + 1;
 
 % Filter and resample transmit signal:
 Transmit = preprocess_transmit(Transmit,Medium,kgrid);
-
-% Distribute integration points at the transducer surface:
-Transducer = get_transducer_integration_points(...
-    Transducer, Transmit, Medium, Grid);
 
 % define the transducer source
 disp('Creating k-Wave sensor object for transducer.')

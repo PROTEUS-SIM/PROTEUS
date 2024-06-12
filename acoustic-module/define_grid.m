@@ -35,7 +35,7 @@ dz = dx;
 % Get the domain boundaries:
 D = Geometry.Domain;
 
-% Set up (1/2-integer shifted) integer grids:
+% Set up integer grids:
 X1 =  ceil(D.Xmin/dx);
 X2 = floor(D.Xmax/dx);
 

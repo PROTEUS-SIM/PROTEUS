@@ -11,6 +11,8 @@ SimulationParameters.PointsPerWavelength    = ppwl;
 SimulationParameters.NumberOfInteractions = 0;
 SimulationParameters.HybridSimulation     = true;
 SimulationParameters.SensorOnGrid         = false;
+SimulationParameters.TransducerOnGrid     = false;
+SimulationParameters.IntegrationDensity   = 1;
 
 SimulationParameters.Solver       = '3DC';
 SimulationParameters.DeviceNumber = 0;

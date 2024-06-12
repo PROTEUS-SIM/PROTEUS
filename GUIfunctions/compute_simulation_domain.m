@@ -3,14 +3,25 @@ function Geometry = compute_simulation_domain(...
 % Compute the required simulation domain. The simulation domain should
 % capture the beam up to the maximum depth of the vessel tree.
 
+% For RCA transducers only use the first half of the elements, representing
+% the columns:
+if isfield(Transducer,'Configuration') && ...
+        strcmp(Transducer.Configuration,'RCA')
+    N = Transducer.NumberOfElements;
+    if mod(N,2)
+        error('Number of elements in RCA must be even.')
+    else
+        Transducer.NumberOfElements = N/2;
+    end
+end
+
 % Add the depth of the rotated bounding box to the start depth:
 startDepth = Geometry.startDepth;
 endDepth   = compute_end_depth(Geometry);
 
 % Compute the vertices of the transducer surface and its projection on the
 % back surface of the domain:
-[TransducerSurface, TransducerProjection] = compute_transducer_vertices(...
-    Transducer, Transmit, endDepth);
+TransducerSurface = compute_transducer_vertices(Transducer);
 
 Domain = Geometry.Domain;
 
@@ -19,6 +30,8 @@ Domain = Geometry.Domain;
 if Domain.Manual
     V = TransducerSurface;
 else
+    TransducerProjection = compute_transducer_projection(...
+        Transducer, Transmit, endDepth);
     V = [TransducerSurface; TransducerProjection];
 end   
 
@@ -37,7 +50,7 @@ if Domain.Manual
 
     % Recompute the vertices of the projection on the back surface of the 
     % domain:
-    [~, TransducerProjection] = compute_transducer_vertices(...
+    TransducerProjection = compute_transducer_projection(...
         Transducer, Transmit, Xmax);
 end
 
@@ -66,11 +79,9 @@ Geometry.Center = [(startDepth + endDepth)/2; 0; 0] ;
 
 end
 
-
-function [TRANS_SURFACE, TRANS_PROJECTION] = ...
-    compute_transducer_vertices(Transducer, Transmit, d)
-% Compute the vertices of the rectangular surface of a transducer. Also
-% compute the vertices of the projection of the transducer surface on a
+function TRANS_PROJECTION = ...
+    compute_transducer_projection(Transducer, Transmit, d)
+% Compute the vertices of the projection of the transducer surface on a
 % parallel surface at a distance d from the transducer.
 %
 % The projection is defined as the intersection of two projections:
@@ -111,19 +122,14 @@ theta   = Transmit.Angle;                   % [deg]
 W = p*(N-1) + w;                          	% [m]
 H = Transducer.ElementHeight;               % [m]
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TRANSDUCER SURFACE VERTICES
-yl	= -W/2;
-yr	=  W/2;
-zb 	= -H/2;
-zt	=  H/2;
-
-Xt = [0 0 0 0];
-Yt = [yr yl yl yr];
-Zt = [zt zt zb zb];
-
-TRANS_SURFACE = transpose([Xt; Yt; Zt]);
+% For custom transducer, no beam approximation can be computed. Return the
+% transducer surface translated by the projection distance.
+if isfield(Transducer,'Configuration') && ...
+        strcmp(Transducer.Configuration,'Custom')
+    TRANS_PROJECTION = compute_transducer_vertices(Transducer);
+    TRANS_PROJECTION(:,1) = d;
+    return
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PROJECTION VERTICES
@@ -155,6 +161,57 @@ Yp = [yr yl yl yr];
 Zp = [zt zt zb zb];
 
 TRANS_PROJECTION = transpose([Xp; Yp; Zp]);
+
+end
+
+function TRANS_SURFACE = compute_transducer_vertices(Transducer)
+% Compute the vertices of the rectangular surface of a transducer.
+%
+% INPUT:
+% - Transducer: struct holding the transducer dimensions.
+%
+% OUTPUT:
+% - TRANS_SURFACE: Vertices of the transducer surface (4x3)
+%
+% Nathan Blanken, University of Twente, 2022
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TRANSDUCER PROPERTIES
+p = Transducer.Pitch;                 % [m]
+w = Transducer.ElementWidth;          % [m]
+N = Transducer.NumberOfElements;
+
+% Compute transducer width and height:
+W = p*(N-1) + w;                      % [m]
+H = Transducer.ElementHeight;         % [m]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TRANSDUCER SURFACE VERTICES
+if isfield(Transducer,'Configuration') && ...
+        strcmp(Transducer.Configuration,'Custom')
+    
+    points = reshape(Transducer.integration_points,[],3);
+    
+    x0 = min(points(:,1));
+    yl = min(points(:,2));
+    yr = max(points(:,2));
+    zb = min(points(:,3));
+    zt = max(points(:,3));
+    
+else
+    x0 = 0;
+    yl = -W/2;
+    yr =  W/2;
+    zb = -H/2;
+    zt =  H/2;
+end
+
+Xt = [x0 x0 x0 x0];
+Yt = [yr yl yl yr];
+Zt = [zt zt zb zb];
+
+TRANS_SURFACE = transpose([Xt; Yt; Zt]);
 
 end
 
