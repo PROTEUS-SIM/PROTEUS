@@ -20,7 +20,12 @@ function [outStruct, Grid] = load_vessel_data(filename, vtuProperties)
 %              - vtu_indices: sparse array with the mapping of each grid
 %                             point to the corresponding entry in the list
 %                             of points in the vtu file 
-%                             ((NX x NY x NZ) x 3 array)
+%                             ((NX x NY x NZ)-by-1 array)
+%
+% Grid.vtu_indices is defined such that vtu_indices(ind) = 0 corresponds to
+% points outside the VTU geometry and
+% outstruct.velocities(vtu_indices(ind)) returns the velocity for ind =
+% sub2ind([NX NY NZ], I, J, K).
 %
 % Nathan Blanken, University of Twente, 2023
 
@@ -63,10 +68,9 @@ K = round((cellCenters(:,3) - Z(1))/dZ) + 1;
 % Convert the subscripts to a linear index:
 ind = sub2ind([NX NY NZ], I, J, K);
 
-% Create a matrix of size [NX*NY*NZ, 3] that holds the index in the vtu 
+% Create a matrix of size [NX*NY*NZ, 1] that holds the index in the vtu 
 % velocity list for each grid point:
 disp('Creating sparse matrix...')
-Grid.vtu_indices = sparse(NX*NY*NZ,1);
 Grid.vtu_indices = sparse(ind,ones(size(ind)),1:length(ind),NX*NY*NZ,1);
 
 % Convert grid properties to standard units:
