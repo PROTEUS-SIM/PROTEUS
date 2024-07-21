@@ -4,7 +4,7 @@ function Documentation = get_documentation_urls()
 %
 % Nathan Blanken, University of Twente, 2023
 
-githubURL = 'https://github.com/NathanBlanken/';
+githubURL = 'https://github.com/PROTEUS-SIM/';
 repoURL   = [githubURL 'PROTEUS/blob/main/'];
 docURL    = [repoURL 'documentation/'];
 
