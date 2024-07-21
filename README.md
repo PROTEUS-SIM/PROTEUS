@@ -1,4 +1,10 @@
-# Contrast-enhanced ultrasound simulator for microbubbles in vascular flow
+# PROTEUS: A Physically Realistic Contrast-Enhanced Ultrasound Simulator
+
+Nathan Blanken , Baptiste Heiles , Alina Kuliesh, Michel Versluis , Kartik Jain, David Maresca, and Guillaume Lajoinie
+
+Contrast-enhanced ultrasound simulator for microbubbles in vascular flow
+
+Link to the article: https://ieeexplore.ieee.org/document/10597664
 
 ## System requirements
 
@@ -177,4 +183,19 @@ The simulator has been created and tested to be compatible with Musubi. Currentl
 The output of the flow simulations is in VTU format. Before the flow data can be used for the acoustic simulations, the data needs to be converted to MATLAB format, stored in the right folder, and supplemented with metadata. Detailed instructions on how to do this can be found in [Importing new flow geometries and flow data](documentation/NewGeometry.md).
 
 If you believe your geometry is useful to other researchers, do not hesitate to share it with us so that we can add it to the database.
+
+## License and citation
+
+This code is available under an MIT licencse. If you use (parts of) the code, please cite our IEEE T-UFFC article:
+
+Blanken, N., Heiles, B., Kuliesh, A., Versluis, M., Jain, K., Maresca, D., & Lajoinie, G. (2024). PROTEUS: A Physically Realistic Contrast-Enhanced Ultrasound Simulator—Part I: Numerical Methods. _IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control_. https://doi.org/10.1109/TUFFC.2024.3427850
+
+    @article{Blanken2024,
+      author  = {Blanken, Nathan and Heiles, Baptiste and Kuliesh, Alina and Versluis, Michel and Jain, Kartik and Maresca, David and Lajoinie, Guillaume},
+      doi     = {10.1109/TUFFC.2024.3427850},
+      journal = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+      title   = {{PROTEUS}: A Physically Realistic Contrast-Enhanced Ultrasound Simulator---{Part I}: Numerical Methods},
+      year    = {2024}
+    }
+    
 
