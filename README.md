@@ -23,7 +23,7 @@ Link to the article: https://ieeexplore.ieee.org/document/10597664
 
 **Method 2: Clone with git**
 
-`git clone https://github.com/NathanBlanken/microbubble-flow-simulator-gui.git`.
+`git clone https://github.com/PROTEUS-SIM/PROTEUS.git`.
 
 ### k-Wave
 1. Download k-Wave from [k-wave.org](http://www.k-wave.org/index.php) We strongly recommend the use of [k-Wave version 1.3](http://www.k-wave.org/downloadprevious.php). Place the root folder of k-Wave (`k-wave-toolbox-version-1.3`) in the root folder of this repository.
