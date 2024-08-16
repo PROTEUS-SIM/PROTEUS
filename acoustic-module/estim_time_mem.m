@@ -21,9 +21,13 @@ time_sim_all = time_sim_all * param.num_pulse;
 A_max = 9;
 B_max = 2;
 
-input = numel(source.ux) + param.max_mb * num_steps(2);
-
-output = size(source.ux, 1);
+if isfield(source,'ux')
+    input = numel(source.ux) + param.max_mb * num_steps(2);
+    output = size(source.ux, 1);
+else
+    input = numel(source.p) + param.max_mb * num_steps(2);
+    output = size(source.p, 1);
+end
 
 mem_sim.min = (13 * Nx * Ny * Nz + 7 * Nx /2 * Ny * Nz) * 4 / 1024^3  + ...
     (input * 8  + output * 8) / 1024^3;

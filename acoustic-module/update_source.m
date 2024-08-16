@@ -14,6 +14,13 @@ if isempty(source_mask_idx)
     return
 end
 
+% In a future version, we will solve the case in which the transducer is
+% also defined as a pressure source. Currently, only velocity source
+% transducers are supported.
+if isfield(source,'p_mask')
+    error('Input argument SOURCE already has a field P_MASK.')
+end
+
 source.p_mask = zeros(Grid.Nx, Grid.Ny, Grid.Nz);
 source.p_mask(source_mask_idx) = 1;
 
