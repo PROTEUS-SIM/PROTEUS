@@ -30,9 +30,9 @@ load(GUIfilename,'Geometry','Medium','SimulationParameters')
 % Location of the geometry data:
 Geometry.GeometriesPath = geometriesPath;
 
-% Create the grid:
-disp('Creating k-Wave grid ...')
-[~, Grid] = define_grid(SimulationParameters, Geometry);
+% Create the PROTEUS grid
+disp('Creating PROTEUS grid ...')
+Grid = define_grid(SimulationParameters, Geometry);
 
 % Create and save the k-Wave medium:
 disp('Creating k-Wave medium ...')
