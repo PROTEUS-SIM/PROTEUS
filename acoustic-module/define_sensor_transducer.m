@@ -18,7 +18,7 @@ points = reshape(Transducer.integration_points, N_points, N_dim);
 mask_only = false;
 sensor.mask = zeros(Grid.Nx, Grid.Ny, Grid.Nz, 'logical');
  
-[sensor, sensor_weights] = update_sensor(...
+[sensor, sensor_weights] = update_sensor_fast(...
     sensor, points, points_idx, Grid, mask_only);
 
 sensor.record = {'p'};

@@ -1,5 +1,11 @@
 function [sensor, sensor_weights] = update_sensor(...
     sensor, points, points_idx, Grid, mask_only)
+%UPDATE_SENSOR: a faster version of UPDATE_SENSOR exists:
+%update_sensor_fast. See update_sensor_fast for more information.
+%
+% See also: update_sensor_fast
+%
+% Nathan Blanken, University of Twente, 2024
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SENSOR MASK
