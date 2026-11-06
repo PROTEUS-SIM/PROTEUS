@@ -13,7 +13,10 @@ function source = define_source_transducer(Transducer, Transmit, ...
 % output:   source                  the transducer source object
 % =========================================================================
 
-p = Transmit.PressureSignal;
+% Work in double precision: custom transmit data loaded from mat files
+% (pressure signal, delays, apodization) may be single, and before R2025a
+% MATLAB cannot multiply the sparse source weights by a single matrix.
+p = double(Transmit.PressureSignal);
 M = length(p);
 
 % The velocity source of a curved array is normal to its surface. Lateral
@@ -61,15 +64,15 @@ if isfield(Transducer,'SourceType') && ...
     p = sinc_interpolation(t, p, t+Grid.dt/2);
 end
 
-delays  = Transducer.integration_transmit_delays;
-apod    = Transducer.integration_transmit_apodization;
-weights = Transducer.integration_weights;
+delays  = double(Transducer.integration_transmit_delays);
+apod    = double(Transducer.integration_transmit_apodization);
+weights = double(Transducer.integration_weights);
 
 % Apply electronic delays:
-delays = delays + transpose(Transmit.Delays);
+delays = delays + transpose(double(Transmit.Delays));
 
 % Apply electronic apodization:
-apod   = apod.*transpose(Transmit.Apodization);
+apod   = apod.*transpose(double(Transmit.Apodization));
 
 % Pulsing scheme
 switch Transmit.SeqPulse

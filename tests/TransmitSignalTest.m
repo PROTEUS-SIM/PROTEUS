@@ -40,5 +40,45 @@ classdef (SharedTestFixtures = {ProteusTestEnvironment}) ...
                 testCase.verifyTrue(strcmp(w.class,'double'), expected{k,1});
             end
         end
+
+        function singleCustomTransmitGivesDoubleSource(testCase)
+            % Custom delays saved as single made the source signals single;
+            % before R2025a, the product with the sparse source weights then
+            % failed ("MTIMES is not supported for one sparse argument and
+            % one single argument"). The source must be double.
+            env = testCase.getSharedTestFixtures('ProteusTestEnvironment');
+            S = make_default_settings(env.PATHS, 'tiny_box', 'current');
+            S.Transducer.Type = 'P4-1';
+            S.Transducer = get_transducer_properties(S.Transducer);
+            S.Transmit = reset_transmit(S.Transducer);
+            S.SimulationParameters.PointsPerWavelength = 2;
+            S = update_derived_settings(S);
+            S.SimulationParameters.GridSize = S.Medium.SpeedOfSound/ ...
+                (S.Transmit.CenterFrequency*2);
+            Grid = define_grid(S.SimulationParameters, S.Geometry);
+            Grid.dt = 1e-8;
+            T = S.Transducer;
+            T.OnGrid = false;
+            T.IntegrationDensity = 1;
+            T = get_transducer_integration_points(T, Grid);
+            T = get_transducer_integration_delays(T, S.Medium);
+            Nel = T.NumberOfElements;
+
+            Tx.PressureSignal = single([0 1 -1 0]);
+            Tx.Delays = single(linspace(0, 1e-7, Nel));
+            Tx.Apodization = single(ones(1, Nel));
+            Tx.SeqPulse = 'full';
+            Medium.SpeedOfSound = 1540; Medium.Density = 1000;
+
+            for type = {'dipole','monopole'}
+                T.SourceType = type{1};
+                [sensor, w] = define_sensor_transducer(T, Grid);
+                src = define_source_transducer(T, Tx, Medium, Grid, w', ...
+                    find(sensor.mask));
+                if isfield(src,'ux'), s = src.ux; else, s = src.p; end
+                testCase.verifyClass(s, 'double', type{1});
+                testCase.verifyTrue(all(isfinite(s(:))), type{1});
+            end
+        end
     end
 end
