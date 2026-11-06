@@ -19,6 +19,18 @@ end
 startDepth = Geometry.startDepth;
 endDepth   = compute_end_depth(Geometry);
 
+% The surface of a curved array protrudes beyond x = 0:
+if isfield(Transducer,'Configuration') && ...
+        strcmp(Transducer.Configuration,'Curved')
+    El = get_element_geometry(Transducer);
+    if startDepth < El.Apex
+        warning('compute_simulation_domain:geometryBehindTransducer', ...
+            ['The geometry starts at %.1f mm, behind the surface of the ' ...
+            'curved array (apex at %.1f mm). Increase the start depth.'], ...
+            startDepth*1e3, El.Apex*1e3)
+    end
+end
+
 % Compute the vertices of the transducer surface and its projection on the
 % back surface of the domain:
 TransducerSurface = compute_transducer_vertices(Transducer);
@@ -131,6 +143,18 @@ if isfield(Transducer,'Configuration') && ...
     return
 end
 
+% For a curved array, use the width of the line through its outer edges.
+% An infinite focus is a diverging wave from the centre of curvature (see
+% compute_delays).
+if isfield(Transducer,'Configuration') && ...
+        strcmp(Transducer.Configuration,'Curved')
+    El = get_element_geometry(Transducer);
+    W = 2*El.Radius*sin(El.ThetaMax);
+    if ~isfinite(f_l)
+        f_l = El.Center;
+    end
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PROJECTION VERTICES
 
@@ -171,7 +195,10 @@ function TRANS_SURFACE = compute_transducer_vertices(Transducer)
 % - Transducer: struct holding the transducer dimensions.
 %
 % OUTPUT:
-% - TRANS_SURFACE: Vertices of the transducer surface (4x3)
+% - TRANS_SURFACE: Vertices of the transducer surface (4x3). For a curved
+%   array, the vertices of the flat quadrilateral through the edges of
+%   each element ((4*N)x3, element by element, ordered as for a flat
+%   transducer).
 %
 % Nathan Blanken, University of Twente, 2022
 
@@ -189,6 +216,27 @@ H = Transducer.ElementHeight;         % [m]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TRANSDUCER SURFACE VERTICES
 if isfield(Transducer,'Configuration') && ...
+        strcmp(Transducer.Configuration,'Curved')
+
+    El = get_element_geometry(Transducer);
+    R  = El.Radius;
+    thetaL = El.theta - El.width/(2*R);  % Angles of the left edges
+    thetaR = El.theta + El.width/(2*R);  % Angles of the right edges
+
+    xl = El.Center + R*cos(thetaL); yl = R*sin(thetaL);
+    xr = El.Center + R*cos(thetaR); yr = R*sin(thetaR);
+    zb = -H/2*ones(N,1);
+    zt =  H/2*ones(N,1);
+
+    % One row per vertex, four vertices per element:
+    Xt = [xr xl xl xr]';
+    Yt = [yr yl yl yr]';
+    Zt = [zt zt zb zb]';
+
+    TRANS_SURFACE = [Xt(:) Yt(:) Zt(:)];
+    return
+
+elseif isfield(Transducer,'Configuration') && ...
         strcmp(Transducer.Configuration,'Custom')
     
     points = reshape(Transducer.integration_points,[],3);

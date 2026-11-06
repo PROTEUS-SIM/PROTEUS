@@ -1,14 +1,18 @@
-function M_DAS = compute_das_matrix(t, x, y, x_el, c, Fs, focus)
+function M_DAS = compute_das_matrix(t, y, x, y_el, c, Fs, focus)
 %COMPUTE_DAS_MATRIX Compute delay-and-sum reconstruction matrix. Construct
 %a sparse matrix that performs delay-and-sum reconstruction on element RF
-%data. The matrix is M-by-N, where M is the total number of pixels (Nx*Ny) 
-%and N is the total number of elements in the RF data (Nt*Nelem).
+%data. The matrix is M-by-N, where M is the total number of pixels (Ny*Nx,
+%lateral index fastest) and N is the total number of elements in the RF
+%data (Nt*Nelem).
+%
+% Coordinates follow the PROTEUS convention (x axial, y lateral); note the
+% order of the arguments (lateral before axial).
 %
 % INPUT ARGUMENTS:
 % t:      time array corresponding to the RF data (column array)
-% x:      lateral coordinates of the reconstruction [m]
-% y:      axial   coordinates of the reconstruction [m]
-% x_el:   transducer element coordinates [m]
+% y:      lateral coordinates of the reconstruction [m]
+% x:      axial   coordinates of the reconstruction [m]
+% y_el:   lateral transducer element coordinates [m]
 % c:      speed of sound for the reconstruction [m/s]
 % Fs:     sampling rate of the RF data
 % focus:  lateral focus of the transmit beam
@@ -27,12 +31,12 @@ Nx      = length(x);     % Number of pixels in x
 Ny      = length(y);     % Number of pixels in y
 Npixels = Nx*Ny;         % Total number of pixels
 Nt      = length(t);     % Number of time samples per element
-Nelem   = length(x_el);  % Number of elements
+Nelem   = length(y_el);  % Number of elements
 
-% Image coordinate grid:
-[X, Y] = ndgrid(x, y);
-X = X(:);
+% Image coordinate grid (lateral index fastest):
+[Y, X] = ndgrid(y, x);
 Y = Y(:);
+X = X(:);
 
 if isfinite(focus) && focus >=0
     error('Only negative focus and infinite focus supported.')
@@ -41,10 +45,10 @@ end
 F = abs(focus);
 if isfinite(F)
     % Focused beam:
-    t_del = sqrt((X-x_el).^2 + Y.^2)/c + sqrt((Y+F).^2 + X.^2)/c - F/c;
+    t_del = sqrt((Y-y_el).^2 + X.^2)/c + sqrt((X+F).^2 + Y.^2)/c - F/c;
 else
     % Plane wave:
-    t_del = sqrt((X-x_el).^2 + Y.^2)/c + Y/c;
+    t_del = sqrt((Y-y_el).^2 + X.^2)/c + X/c;
 end
 
 % Compute the indices (i,j,k) of an Npixel-by-Nt-by-Nelem sparse matrix
@@ -56,7 +60,7 @@ v = ones(Npixels,Nelem);          % Element apodization
 
 % Angle (f-number) dependent apodization (discard elements with a greater 
 % angle to the pixel than the threshold angle):
-alpha = atan(abs(x_el-X)./Y);
+alpha = atan(abs(y_el-Y)./X);
 v(alpha > alpha_th) = 0;
 
 % Reshape into column arrays:

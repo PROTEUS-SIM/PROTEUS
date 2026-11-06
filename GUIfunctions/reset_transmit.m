@@ -25,7 +25,7 @@ Transmit.ApodizationType    = 'Uniform apodization';
 Transmit.SignalsDefined     = true;
 
 switch Transducer.Configuration
-    case 'Linear'
+    case {'Linear','Curved'}
         Transmit.DelayType  = 'Compute delays';
     case 'RCA'
         Transmit.DelayType  = 'No delays';

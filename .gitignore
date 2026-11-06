@@ -1,3 +1,59 @@
-/ground_truth_frames/
-/simulation-settings
+# ---------------------------------------------------------------------------
+# PROTEUS .gitignore (single file for the whole repository)
+# ---------------------------------------------------------------------------
+
+# Simulation outputs (created at run time by path_setup)
 /RESULTS/
+/ground_truth_frames/
+/simulation-settings/
+
+# Third-party dependencies installed locally (k-Wave, vtkToolbox, ...)
+/external/
+# k-Wave installations from earlier PROTEUS versions
+/k-wave-toolbox-version-*/
+
+# Local, per-user configuration (PATHS.mat is the deprecated format)
+/proteus_local_paths.m
+/PATHS.mat
+/PATHS.mat.test-backup
+
+# Flow geometry data: only the reference geometries' metadata and preview
+# images are tracked. Downloaded/generated data (VTU, STL, MAT) and any
+# user-added geometry folder stay untracked.
+/geometry_data/*
+!/geometry_data/vtu2matlab.m
+!/geometry_data/README.md
+!/geometry_data/renal_tree/
+!/geometry_data/mouse_brain/
+!/geometry_data/pipe_2cm_Re5000/
+/geometry_data/*/*
+!/geometry_data/*/GeometryProperties.mat
+!/geometry_data/*/*.png
+
+# Test artifacts
+/tests/output/
+/test-results/
+/code-coverage/
+
+# Rendered videos (e.g. delay-and-sum/write_video.m)
+*.mp4
+*.avi
+
+# MATLAB
+*.slxc
+*.asv
+*.m~
+*.mex*
+slprj/
+sccprj/
+codegen/
+*.autosave
+resources/project/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+.claude/

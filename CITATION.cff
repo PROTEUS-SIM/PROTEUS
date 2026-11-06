@@ -22,9 +22,9 @@ authors:
   given-names: "Guillaume"
   orcid: "https://orcid.org/0000-0002-8226-7301"
 title: "PROTEUS"
-version: 1.0.0
+version: 1.1.0
 doi: 10.1109/TUFFC.2024.3427850
-date-released: 2024-07-15
+date-released: 2026-11-06
 url: "https://github.com/PROTEUS-SIM/PROTEUS"
 preferred-citation:
   type: article

@@ -53,15 +53,20 @@ if ~isfolder(savedir)
 end
 disp(['Pressure maps will be saved in: ' newline savedir '.' newline])
 
-% Define the k-Wave grid:
+% Create the PROTEUS grid
+disp('Creating PROTEUS grid ...')
+Grid = define_grid(SimulationParameters, Geometry);
+
+% Create the k-Wave grid
 disp('Creating k-Wave grid ...')
-[kgrid, Grid] = define_grid(SimulationParameters, Geometry);
+kgrid = kWaveGrid(Grid.Nx, Grid.dx, Grid.Ny, Grid.dy, Grid.Nz, Grid.dz);
+kgrid.dt = Grid.dt;
 
 run_param.PML = Grid.PML;
 
 % Define the k-Wave medium:
 disp('Creating k-Wave medium ...')
-[medium, vessel_grid] = define_medium(Grid, Medium, Geometry);
+[medium, vessel_grid] = define_medium(Grid, Medium, Geometry, Transducer);
 
 % Save the k-Wave medium
 if Medium.Save

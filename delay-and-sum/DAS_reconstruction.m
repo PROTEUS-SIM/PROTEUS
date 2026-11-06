@@ -1,4 +1,9 @@
-function [IMG,z,x] = DAS_reconstruction(folder,filename_parameters)
+function [IMG,x,y] = DAS_reconstruction(folder,filename_parameters)
+%DAS_RECONSTRUCTION Delay-and-sum reconstruction of PROTEUS RF data.
+%
+% [IMG,x,y] = DAS_RECONSTRUCTION(folder,filename_parameters) returns the
+% log-compressed images IMG (Nx-by-Ny-by-Nframes) with x the axial and y
+% the lateral pixel coordinates (PROTEUS convention).
 
 %==========================================================================
 % LOAD DATA AND METADATA
@@ -20,7 +25,7 @@ t = (0:(Nt-1))/Fs;  % Time axis (s)
 
 % Transducer properties:
 p = Transducer.Pitch;
-x_el = -p/2*(Nelem-1) + (0:(Nelem-1))*p; % Element positions (m)
+y_el = -p/2*(Nelem-1) + (0:(Nelem-1))*p; % Lateral element positions (m)
 focus = Transmit.LateralFocus;
 
 % Reconstruction properties:
@@ -32,8 +37,8 @@ pixelSize = lambda/5;
 Domain = Geometry.Domain;
 width = Domain.Ymax - Domain.Ymin; % Domain width (m)
 depth = Domain.Xmax;               % Domain depth (m)
-x = -width/2:pixelSize:width/2;    % Lateral coordinates (m)
-z = 0:pixelSize:depth;             % Axial coordinates (m)
+x = 0:pixelSize:depth;             % Axial coordinates (m)
+y = -width/2:pixelSize:width/2;    % Lateral coordinates (m)
 
 %==========================================================================
 % COMPUTE TIME TO PEAK
@@ -78,7 +83,7 @@ RF = RF.*TGC;
 %==========================================================================
 % COMPUTE DAS MATRIX
 %==========================================================================
-M_DAS = compute_das_matrix(t, x, z, x_el, c, Fs, focus);
+M_DAS = compute_das_matrix(t, y, x, y_el, c, Fs, focus);
 
 %==========================================================================
 % RESHAPE RF DATA AND APPLY DAS MATRIX
@@ -97,8 +102,11 @@ disp('Applying DAS matrix')
 IMG = full(M_DAS*RF);
 
 disp('Reshaping image data array')
-% Reshape image into an Nx-by-Ny-by-Nframes array:
-IMG = reshape(IMG, [length(x) length(z) Nframes]);
+% Reshape image into an Ny-by-Nx-by-Nframes array (the pixels of the DAS
+% matrix are ordered lateral first) and permute to Nx-by-Ny-by-Nframes
+% (axial-by-lateral):
+IMG = reshape(IMG, [length(y) length(x) Nframes]);
+IMG = permute(IMG, [2 1 3]);
 
 %==========================================================================
 % DEMODULATION AND LOG COMPRESSION

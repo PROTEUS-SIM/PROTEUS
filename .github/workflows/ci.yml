@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, revamp]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: MATLAB tests (${{ matrix.release }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        release: [R2025a]
+    env:
+      # Fail (instead of skip) tests whose requirements are missing:
+      PROTEUS_TEST_STRICT: "1"
+    steps:
+      - name: Check out PROTEUS
+        uses: actions/checkout@v4
+
+      - name: Cache k-Wave
+        id: cache-kwave
+        uses: actions/cache@v4
+        with:
+          path: external/k-wave
+          key: k-wave-v1.4.1
+
+      - name: Install k-Wave 1.4.1
+        if: steps.cache-kwave.outputs.cache-hit != 'true'
+        run: git clone --depth 1 --branch v1.4.1 https://github.com/ucl-bug/k-wave.git external/k-wave
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{ matrix.release }}
+          cache: true
+          # Only the toolboxes PROTEUS requires, so that CI fails on any
+          # new dependency (the Statistics toolbox draws are stored in
+          # tests/baseline/truncated_normal.mat):
+          products: >
+            Signal_Processing_Toolbox
+
+      - name: Run tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            cd tests
+            results = runProteusTests(ReportFolder="../test-results");
+            % Incomplete tests (e.g. cases without a recorded baseline) are
+            % listed in the report but do not fail the build:
+            assert(~any([results.Failed]), "Some tests failed.");
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.release }}
+          path: test-results/

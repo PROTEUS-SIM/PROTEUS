@@ -1,0 +1,18 @@
+# Store and check out all text files with LF line endings on every OS
+# (MATLAB reads LF fine on Windows), so commits never change endings.
+* text=auto eol=lf
+
+# Binary MATLAB and media files: never diff or merge as text
+*.mat    binary
+*.mlapp  binary
+*.mlx    binary
+*.slx    binary
+*.fig    binary
+*.mltbx  binary
+*.png    binary
+*.jpg    binary
+*.gif    binary
+*.stl    binary
+*.vtu    binary
+*.h5     binary
+*.pdf    binary

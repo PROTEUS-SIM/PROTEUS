@@ -1,6 +1,6 @@
 # PROTEUS: A Physically Realistic Contrast-Enhanced Ultrasound Simulator
 
-Nathan Blanken , Baptiste Heiles , Alina Kuliesh, Michel Versluis , Kartik Jain, David Maresca, and Guillaume Lajoinie
+Nathan Blanken, Baptiste Heiles, Alina Kuliesh, Michel Versluis, Kartik Jain, David Maresca, and Guillaume Lajoinie
 
 Contrast-enhanced ultrasound simulator for microbubbles in vascular flow
 
@@ -8,7 +8,10 @@ Link to the article: https://ieeexplore.ieee.org/document/10597664
 
 ## System requirements
 
-- Installation of MATLAB is required. We recommend to use MATLAB 2019b or later as we cannot guarantee full functionality with older versions.
+- MATLAB R2021a or later is required (the test suite and CI use R2025a), with the following toolboxes:
+  - Signal Processing Toolbox (required)
+  - Parallel Computing Toolbox (optional: GPU simulations and parallel microbubble batches)
+- [k-Wave](https://github.com/ucl-bug/k-wave) version **1.4.1** (1.4.x accepted; older versions are rejected).
 - The simulator was created and tested on Windows and Linux platforms. The simulator can also run on macOS, but the k-Wave binaries for accelerated simulation need to be compiled from the C++ source code. For Windows and Linux, the compiled binaries are readily available (see [Installation of the simulator](#installation-of-the-simulator)).
 - Although the simulations can be run on a CPU, the use of a GPU is strongly recommended. GPU usage increases the speed of the k-Wave simulations by typically two orders of magnitude.
 - The minimum requirements for the GPU depend on the specific parameters of the simulation, most notably the size of the computational domain. For practical use, we recommend a GPU with at least 8 GB of dedicated memory. For reference, we have tested the simulator on an Nvidia Quadro RTX 6000 24GB.
@@ -26,12 +29,20 @@ Link to the article: https://ieeexplore.ieee.org/document/10597664
 `git clone https://github.com/PROTEUS-SIM/PROTEUS.git`.
 
 ### k-Wave
-1. Download k-Wave from [k-wave.org](http://www.k-wave.org/index.php) We strongly recommend the use of [k-Wave version 1.3](http://www.k-wave.org/downloadprevious.php). Place the root folder of k-Wave (`k-wave-toolbox-version-1.3`) in the root folder of this repository.
-2. [Download](http://www.k-wave.org/download.php) the k-Wave C++ Simulation Codes for accelerated k-Wave simulations. These codes have already been compiled into binary files for 64-bit Linux and Windows systems. macOS users need to compile the C++ source code themselves. Place the binary files in the `binaries` folder (`k-wave-toolbox-version-1.3/k-Wave/binaries`).
+1. Install k-Wave 1.4.1 in `external/k-wave` (this folder is ignored by git). Either run, from the repository root in MATLAB:
+   ```matlab
+   setup_proteus('InstallKWave',true)
+   ```
+   or clone it yourself:
+   ```bash
+   git clone --depth 1 --branch v1.4.1 https://github.com/ucl-bug/k-wave.git external/k-wave
+   ```
+2. [Download](http://www.k-wave.org/download.php) the k-Wave C++ Simulation Codes for accelerated k-Wave simulations (solvers `3DC` and `3DG`). These codes have already been compiled into binary files for 64-bit Linux and Windows systems. macOS users need to compile the C++ source code themselves. Place the binary files in `external/k-wave/k-Wave/binaries`.
 
-**Note:** There is an issue with using k-Wave version 1.3 in MATLAB 2020A. A solution is provided [here](http://www.k-wave.org/forum/topic/error-reading-h5-files-when-using-binaries).
+**Note:** To install k-Wave in a different location, see [Custom installation](#custom-installation).
 
-**Note:** If you use another k-Wave version or you install k-Wave in a different location (not recommended), you need to modify the installation paths in the file `PATHS.mat`, so that k-Wave can be located (see [Custom installation](#custom-installation) below).
+### Checking the installation
+Run `setup_proteus` in MATLAB from the repository root. It adds PROTEUS and k-Wave to the MATLAB path and reports which dependencies, binaries and data sets are installed.
 
 ### Example flow geometry data
 Download example flow geometry data from [Zenodo](https://zenodo.org/records/10573662). There are three flow geometries:
@@ -55,16 +66,29 @@ Download the flow geometries you wish to use, unzip the ZIP files, and place the
 
 The output of Musubi is in VTU format. You need the vtkToolbox to convert VTU data to a MATLAB readable format. 
 - Download the vtkToolbox from [MATLAB File Exchange](https://nl.mathworks.com/matlabcentral/fileexchange/94993-vtktoolbox) or [GitHub](https://github.com/KIT-IBT/vtkToolbox).
-- Copy the contents of vtkToolbox to `geometry_data/vtkToolbox`.
+- Place the vtkToolbox in `external/vtkToolbox` (ignored by git), so that `external/vtkToolbox/MATLAB` exists, and compile it as described in its README.
 
 ### Custom installation
-We strongly recommend to install the software components (such as k-Wave) in the specified locations. However, if you wish to install components in different locations, you need to modify the file `PATHS.mat`:
-- In MATLAB, navigate to the root folder of the repository.
-- Load the file: `load('PATHS.mat')`
-- View the table: `open('PATHS')`
-- Enter `'FULL-PATH-TO-MODULE'` in the relevant `Path` field. Do NOT modify the `Description` field.
-- Leave the `Path` fields empty for components that are installed in the default location.
-- Save the file: `save('PATHS.mat','PATHS')`.
+We recommend to install the software components (such as k-Wave) in the default locations. To use other locations, copy `proteus_local_paths.template.m` to `proteus_local_paths.m` (ignored by git) and fill in the full paths of the components you installed elsewhere. Empty paths use the default location. Alternatively, set the environment variable `PROTEUS_LOCAL_PATHS` to the full path of such a file.
+
+**Note:** custom paths stored in `PATHS.mat` (the format used by earlier versions) are still read, with a deprecation warning, when no `proteus_local_paths.m` exists. `PATHS.mat` is no longer part of the repository: if you customised it, copy your paths to `proteus_local_paths.m` (or move `PATHS.mat` aside) **before** pulling this version, otherwise git reports a conflict on `PATHS.mat`.
+
+## Coordinate convention
+
+All of PROTEUS (grid, k-Wave arrays, transducers, geometries, microbubble
+positions, pressure maps and reconstructed images) uses one orientation:
+
+| Axis | Direction | Notes |
+|---|---|---|
+| x | axial (depth) | flat arrays lie at x = 0 and face positive x; curved arrays have their outer edges at x = 0 and protrude into x > 0 |
+| y | lateral | the elements of linear and curved arrays are spread along y |
+| z | elevation (height) | the element height; small compared with x and y |
+
+The imaging plane is the xy plane (z = 0). Arrays are indexed in this order,
+for example a pressure map or image is Nx-by-Ny (depth-by-lateral). Code that
+calls PROTEUS functions directly must use the same orientation: transducer
+integration points outside the grid (for example a transducer defined with z
+as depth) raise an error.
 
 ## Simulation setup
 
@@ -111,7 +135,7 @@ At the bottom of the main window there are buttons to load and save simulation s
 
 **Note:** If your computer does not have a GPU with at least 8 GB of dedicated memory, we advise to prepare your settings and ground truth data locally, and run the simulation [from the command line](#running-the-simulation-from-the-command-line) on a remote system.
 
-**Note** If you are using the default settings and you click **Simulate RF data** or **Simulate pressure field** a computationally demanding simulation will start. If you only want to test the functionality of the code and are not interested in a physically realistic scenario, you can click **Load settings** and select the file `test_settings.mat`.
+**Note** If you are using the default settings and you click **Simulate RF data** or **Simulate pressure field** a computationally demanding simulation will start. If you only want to test the functionality of the code and are not interested in a physically realistic scenario, reduce the size of the simulation first: for example fewer microbubbles and frames, a small number of transducer elements, and fewer points per wavelength. See `tests/helpers/make_tiny_settings.m` for settings that finish in seconds.
 
 ## Running the simulation from the graphical user interface
 
@@ -186,7 +210,7 @@ If you believe your geometry is useful to other researchers, do not hesitate to 
 
 ## License and citation
 
-This code is available under an MIT licencse. If you use (parts of) the code, please cite our IEEE T-UFFC article:
+This code is available under an MIT licence. If you use (parts of) the code, please cite our IEEE T-UFFC article:
 
 Blanken, N., Heiles, B., Kuliesh, A., Versluis, M., Jain, K., Maresca, D., & Lajoinie, G. (2024). PROTEUS: A Physically Realistic Contrast-Enhanced Ultrasound Simulator—Part I: Numerical Methods. _IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control_. https://doi.org/10.1109/TUFFC.2024.3427850
 

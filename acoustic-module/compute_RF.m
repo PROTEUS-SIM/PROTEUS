@@ -86,6 +86,11 @@ p = reshape(sum(p.*weights,2),N_el,N);
 
 if useGPU; p = gather(p); end
 
+if isfield(run_param,'RF_type') && strcmp(run_param.RF_type,'pressure')
+    RF = p;
+    return
+end
+
 % Convolution with receive impulse response
 IR = resample_signal(Transducer.ReceiveImpulseResponse, ...
     Transducer.SamplingRate, 1/Grid.dt, false);

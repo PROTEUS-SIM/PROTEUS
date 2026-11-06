@@ -16,10 +16,11 @@ switch Transmit.Type
 end
 
 % If the user sets the voltage amplitude, scale the voltage curve
-% accordingly.
+% accordingly. The amplitude is the largest absolute value, so that
+% signals that are mostly negative are scaled correctly:
 if strcmp(Transmit.AmplitudeMode,'Voltage')
     V = Transmit.VoltageSignal;
-    Transmit.VoltageSignal = V*(Transmit.VoltageAmplitude/max(V));
+    Transmit.VoltageSignal = V*(Transmit.VoltageAmplitude/max(abs(V)));
 end
 
 end

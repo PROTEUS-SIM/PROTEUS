@@ -43,8 +43,8 @@ T_all = T(1) + NFrames*(Ninter*T(2) + T(3));
 
 % Estimate the number of sources in the transducer:
 V = Geometry.Domain.TransducerSurface;
-W = max(V(:,2)) - min(V(:,1));  % Width [m]
-H = max(V(:,2)) - min(V(:,1));  % Height [m]
+W = max(V(:,2)) - min(V(:,2));  % Width [m]
+H = max(V(:,3)) - min(V(:,3));  % Height [m]
 NSources = round(W/dy*H/dz);
 
 % Estimate number of elements in the input signal:

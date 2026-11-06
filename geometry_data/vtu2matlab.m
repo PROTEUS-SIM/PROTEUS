@@ -26,7 +26,16 @@
 
 clear; clc
 
-addpath('vtkToolbox/MATLAB')
+% Add the vtkToolbox (installed in external/vtkToolbox by default, see
+% README.md) to the MATLAB path:
+addpath('..')
+PATHS = path_setup();
+vtkToolboxPath = fullfile(PATHS.VtkToolboxPath,'MATLAB');
+if ~isfolder(vtkToolboxPath)
+    error(['vtkToolbox not found in ' PATHS.VtkToolboxPath '. Install ' ...
+        'it there or set VtkToolboxPath in proteus_local_paths.m.'])
+end
+addpath(vtkToolboxPath)
 
 geometryFolder = 'renal_tree';
 
@@ -117,7 +126,7 @@ disp('Saving output struct...')
 save(VTUsavepath,'vtuStruct','-v7.3')
 disp('Output struct saved.')
 
-rmpath('vtkToolbox/MATLAB')
+rmpath(vtkToolboxPath)
 
 %--------------------------------------------------------------------------
 % LOAD AN STL FILE OR GENERATE AN STL FILE FROM THE VTU FILE

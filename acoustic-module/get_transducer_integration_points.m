@@ -34,6 +34,19 @@ if isfield(Transducer,'Configuration') && ...
 elseif isfield(Transducer,'Configuration') && ...
         strcmp(Transducer.Configuration,'Custom')
     
+    % Custom points must follow the PROTEUS orientation (x axial, y
+    % lateral, z elevation): an aperture extending mostly along x suggests
+    % another orientation (e.g. z as depth).
+    P = reshape(Transducer.integration_points, [], 3);
+    span = max(P,[],1) - min(P,[],1);
+    if span(1) > max(span(2:3))
+        warning('get_transducer_integration_points:orientation', ...
+            ['The custom transducer extends %.1f mm along x (axial) but ' ...
+            'only %.1f mm along y and %.1f mm along z. PROTEUS uses x ' ...
+            'axial, y lateral, z elevation: check the orientation of ' ...
+            'the integration points.'], span(1)*1e3, span(2)*1e3, span(3)*1e3)
+    end
+
     % Quadrature weight for each integration point:
     Transducer.integration_weights = ...
         Transducer.integration_area/(Grid.dy*Grid.dz);
@@ -64,6 +77,15 @@ N = Transducer.NumberOfElements;
 p = Transducer.Pitch;
 w = Transducer.ElementWidth;
 
+% A curved array is kerf-free: each element spans one pitch along the arc
+% (see get_element_geometry):
+curved = isfield(Transducer,'Configuration') && ...
+    strcmp(Transducer.Configuration,'Curved');
+if curved
+    El = get_element_geometry(Transducer);
+    w = El.width;
+end
+
 W = (N-1)*p + w;                % Transducer width
 H = Transducer.ElementHeight;   % Transducer height
 
@@ -76,7 +98,8 @@ y_min = -W/2 + (0:(N-1))*p;     % Left boundaries of transducer elements
 % Target integration point density (one-dimensional):
 target_density = Transducer.IntegrationDensity;
 
-% Number of integration points per element in lateral direction:
+% Number of integration points per element in lateral direction (along the
+% arc for a curved array):
 N_int_y = ceil(target_density*w/Grid.dy);
 
 % Integration point spacing in lateral direction:
@@ -107,6 +130,20 @@ Transducer.integration_points = zeros(N,N_int,3);
 
 for i = 1:N
     % Coordinates of the integration points in the current element:
+    if curved
+        % Uniform spacing along the arc, centred on the element:
+        s = ((1:N_int_y) - (N_int_y+1)/2)*spacing_int_y;
+        phi = El.theta(i) + s/El.Radius;
+        x = El.Center + El.Radius*cos(phi);
+        y = El.Radius*sin(phi);
+        z = (Z1:Z2)*spacing_int_z;
+
+        [x,z] = ndgrid(x,z);
+        y = repmat(y',1,N_int_z);
+        Transducer.integration_points(i,:,:) = [x(:) y(:) z(:)];
+        continue
+    end
+
     x = 0;
     y = y_min(i) + (1:N_int_y)*spacing_int_y - spacing_int_y/2;
     z = (Z1:Z2)*spacing_int_z;
@@ -116,7 +153,8 @@ for i = 1:N
     
 end
 
-% Quadrature weight for each integration point:
+% Quadrature weight for each integration point (for a curved array, the
+% points are equally spaced along the arc, so the weight is the same):
 Transducer.integration_weights = ...
     spacing_int_y*spacing_int_z/(Grid.dy*Grid.dz);
 

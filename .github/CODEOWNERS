@@ -1,0 +1,5 @@
+# Code owners review every pull request to main (see the ruleset on main).
+# A pull request needs the approval of a code owner other than its author.
+# Later rules override earlier ones; add module owners below as needed, e.g.
+#   /delay-and-sum/  @theodore-michel
+*  @theodore-michel @NathanBlanken
